@@ -25,10 +25,29 @@ async def change(s):
     s.inst.unobserve(callback, s.name)
 
 
-def on_change(func):
+def on_any_change(func):
     caller_locals = inspect.currentframe().f_back.f_locals
     inputs = [caller_locals[name] for name in inspect.signature(func).parameters]
     def callback(change):
         func(*inputs)
+    for s in inputs:
+        s.inst.observe(callback, s.name)
+
+
+def on_all_change(func):
+    caller_locals = inspect.currentframe().f_back.f_locals
+    inputs = [caller_locals[name] for name in inspect.signature(func).parameters]
+    old_values = [s.v for s in inputs]
+    def wrapper(*inputs):
+        diff = True
+        for i, s in enumerate(inputs):
+            if old_values[i] == s.v:
+                diff = False
+                break
+            old_values[i] = s.v
+        if diff:
+            func(*inputs)
+    def callback(change):
+        wrapper(*inputs)
     for s in inputs:
         s.inst.observe(callback, s.name)
