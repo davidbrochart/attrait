@@ -13,17 +13,15 @@ s_i1 = Signal(counter, 'i1')
 s_i2 = Signal(counter, 'i2')
 
 
-@on_change([s_i1])
-def _(inputs):
-    s_i1, = inputs
+@on_change
+def _(s_i1):
     print('i1 =', s_i1.v)
     if (s_i1.v % 2) == 0:
         s_i2.v += 1
 
 
-@on_change([s_i2])
-def _(inputs):
-    s_i2, = inputs
+@on_change
+def _(s_i2):
     print('        i2 =', s_i2.v)
 
 

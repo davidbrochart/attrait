@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 
 
 class Signal:
@@ -24,13 +25,10 @@ async def change(s):
     s.inst.unobserve(callback, s.name)
 
 
-def on_change(inputs):
-    def decorator(func):
-        def callback(change):
-            func(inputs)
-        for s in inputs:
-            s.inst.observe(callback, s.name)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+def on_change(func):
+    caller_locals = inspect.currentframe().f_back.f_locals
+    inputs = [caller_locals[name] for name in inspect.signature(func).parameters]
+    def callback(change):
+        func(*inputs)
+    for s in inputs:
+        s.inst.observe(callback, s.name)
