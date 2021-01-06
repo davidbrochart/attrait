@@ -16,13 +16,30 @@ class Signal:
         setattr(self.inst, self.name,  value)
 
 
-async def change(s):
+async def any_change(*args):
     event = asyncio.Event()
     def callback(value):
         event.set()
-    s.inst.observe(callback, s.name)
+    for s in args:
+        s.inst.observe(callback, s.name)
     await event.wait()
-    s.inst.unobserve(callback, s.name)
+    for s in args:
+        s.inst.unobserve(callback, s.name)
+
+
+async def all_change(*args):
+    event = asyncio.Event()
+    def callback(value):
+        event.set()
+    for s in args:
+        s.inst.observe(callback, s.name)
+    change_nb = 0;
+    while change_nb < len(args):
+        await event.wait()
+        event.clear()
+        change_nb += 1
+    for s in args:
+        s.inst.unobserve(callback, s.name)
 
 
 def on_any_change(func):
