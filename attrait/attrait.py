@@ -22,3 +22,15 @@ async def change(s):
     s.inst.observe(callback, s.name)
     await event.wait()
     s.inst.unobserve(callback, s.name)
+
+
+def on_change(inputs):
+    def decorator(func):
+        def callback(change):
+            func(inputs)
+        for s in inputs:
+            s.inst.observe(callback, s.name)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
