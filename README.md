@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/davidbrochart/attrait/workflows/CI/badge.svg)](https://github.com/davidbrochart/attrait/actions)
+
 # attrait: asynchronous traitlets
 
 [traitlets](https://traitlets.readthedocs.io) lets variables notify their
