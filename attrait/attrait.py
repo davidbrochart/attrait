@@ -1,34 +1,8 @@
 import asyncio
 import inspect
 
-from traitlets import HasTraits, Any
+from .signal import Signal
 from .apply import debounce, throttle
-
-
-class Traiteur(HasTraits):
-    trait = Any()
-
-
-class Signal:
-
-    def __init__(self,
-                 inst : HasTraits = None,
-                 name : str = None):
-
-        if inst is None:
-            self.inst = Traiteur()
-            self.name = 'trait'
-        else:
-            self.inst = inst
-            self.name = name
-
-    @property
-    def v(self):
-        return getattr(self.inst, self.name)
-
-    @v.setter
-    def v(self, value):
-        setattr(self.inst, self.name,  value)
 
 
 def passthrough(func):
@@ -37,7 +11,7 @@ def passthrough(func):
     return wrapper
 
 
-async def any_change(*signals, apply=passthrough):
+async def change(*signals, apply=passthrough):
     event = asyncio.Event()
     @apply
     def callback(value):
@@ -69,13 +43,11 @@ async def all_change(*signals, apply=passthrough):
         s.inst.unobserve(callback, s.name)
 
 
-def on_any_change(decorator=passthrough):
+def on_change(*signals, apply=passthrough):
     def deco(func):
-        caller_locals = inspect.currentframe().f_back.f_locals
-        signals = [caller_locals[name] for name in inspect.signature(func).parameters]
-        @decorator
+        @apply
         def callback(change):
-            func(*signals)
+            func()
         for s in signals:
             s.inst.observe(callback, s.name)
     return deco

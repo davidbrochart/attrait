@@ -1,17 +1,15 @@
 import time
 import asyncio
-from attrait import Signal, on_any_change, debounce, throttle
+from attrait import Signal, on_change, debounce, throttle
 
 
 def test_debounce_sync():
-    s = Signal()
-    s.v = 0
+    s = Signal(init=0)
 
-    counter = Signal()
-    counter.v = 0
+    counter = Signal(init=0)
 
-    @on_any_change(debounce(0.1, is_async=False))
-    def _(s):
+    @on_change(s, apply=debounce(0.1, is_async=False))
+    def _():
         counter.v += 1
 
     s.v += 1
@@ -27,14 +25,12 @@ def test_debounce_sync():
 
 
 def test_throttle_sync():
-    s = Signal()
-    s.v = 0
+    s = Signal(init=0)
 
-    counter = Signal()
-    counter.v = 0
+    counter = Signal(init=0)
 
-    @on_any_change(throttle(0.13, is_async=False))
-    def _(s):
+    @on_change(s, apply=throttle(0.13, is_async=False))
+    def _():
         counter.v += 1
 
     for _ in range(5):
@@ -47,14 +43,12 @@ def test_throttle_sync():
 
 def test_debounce_async():
     async def main():
-        s = Signal()
-        s.v = 0
+        s = Signal(init=0)
 
-        counter = Signal()
-        counter.v = 0
+        counter = Signal(init=0)
 
-        @on_any_change(debounce(0.1, is_async=True))
-        def _(s):
+        @on_change(s, apply=debounce(0.1, is_async=True))
+        def _():
             counter.v += 1
 
         s.v += 1
@@ -73,14 +67,12 @@ def test_debounce_async():
 
 def test_throttle_async():
     async def main():
-        s = Signal()
-        s.v = 0
+        s = Signal(init=0)
 
-        counter = Signal()
-        counter.v = 0
+        counter = Signal(init=0)
 
-        @on_any_change(throttle(0.13, is_async=True))
-        def _(s):
+        @on_change(s, apply=throttle(0.13, is_async=True))
+        def _():
             counter.v += 1
 
         for _ in range(5):

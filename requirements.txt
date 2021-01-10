@@ -1,1 +1,2 @@
 traitlets>=4.2
+pyvcd>=0.2.4
