@@ -1,3 +1,4 @@
+from textwrap import dedent
 from attrait import Signal, on_change
 
 
@@ -20,13 +21,16 @@ def test_instance():
         res += f'{s1.v} {s2.v} {s3.v}\n'
         s1.v += 1
 
-    ref = '0 0 0\n' \
-          '1 0 0\n' \
-          '2 1 0\n' \
-          '3 1 0\n' \
-          '4 2 1\n' \
-          '5 2 1\n' \
-          '6 3 1\n' \
-          '7 3 1\n' \
-          '8 4 2\n'
+    ref = dedent('''\
+        0 0 0
+        1 0 0
+        2 1 0
+        3 1 0
+        4 2 1
+        5 2 1
+        6 3 1
+        7 3 1
+        8 4 2
+        ''')
+
     assert res == ref
