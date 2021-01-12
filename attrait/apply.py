@@ -3,14 +3,22 @@ from time import time
 from threading import Timer
 
 
+def passthrough(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper
+
+
 class AsyncTimer:
-    def __init__(self, timeout, callback):
+    def __init__(self, timeout, callback, args, kwargs):
         self._timeout = timeout
         self._callback = callback
+        self._args = args
+        self._kwargs = kwargs
 
     async def _job(self):
         await asyncio.sleep(self._timeout)
-        self._callback()
+        self._callback(*self._args, **self._kwargs)
 
     def start(self):
         self._task = asyncio.ensure_future(self._job())
@@ -19,51 +27,51 @@ class AsyncTimer:
         self._task.cancel()
 
 
-def debounce(wait, is_async=False):
+def debounce(wait):
     """ Decorator that will postpone a function's
         execution until after `wait` seconds
         have elapsed since the last time it was invoked. """
-    def decorator(fn):
-        timer = None
-        def debounced(*args, **kwargs):
-            nonlocal timer
-            def call_it():
-                fn(*args, **kwargs)
-            if timer is not None:
-                timer.cancel()
-            if is_async:
-                timer = AsyncTimer(wait, call_it)
+    class Decorator:
+        def __init__(self):
+            self.is_async = False
+            self.timer = None
+        def debounced(self, *args, **kwargs):
+            if self.timer is not None:
+                self.timer.cancel()
+            if self.is_async:
+                self.timer = AsyncTimer(wait, self.fn, args, kwargs)
             else:
-                timer = Timer(wait, call_it)
-            timer.start()
-        return debounced
-    return decorator
+                self.timer = Timer(wait, self.fn, args, kwargs)
+            self.timer.start()
+        def __call__(self, fn):
+            self.fn = fn
+            return self.debounced
+    return Decorator()
 
 
-def throttle(wait, is_async=False):
+def throttle(wait):
     """ Decorator that prevents a function from being called
-        more than once every wait period. """
-    def decorator(fn):
-        time_of_last_call = 0
-        scheduled = False
-        timer = None
-        new_args, new_kwargs = None, None
-        def throttled(*args, **kwargs):
-            nonlocal new_args, new_kwargs, time_of_last_call, scheduled, timer
-            def call_it():
-                nonlocal new_args, new_kwargs, time_of_last_call, scheduled, timer
-                time_of_last_call = time()
-                fn(*new_args, **new_kwargs)
-                scheduled = False
-            new_args, new_kwargs = args, kwargs
-            if not scheduled:
-                scheduled = True
-                time_since_last_call = time() - time_of_last_call
+        more than once every `wait` period. """
+    class Decorator:
+        def __init__(self):
+            self.is_async = False
+            self.time_of_last_call = 0
+            self.scheduled = False
+        def call_it(self, *args, **kwargs):
+            self.time_of_last_call = time()
+            self.fn(*args, **kwargs)
+            self.scheduled = False
+        def throttled(self, *args, **kwargs):
+            if not self.scheduled:
+                self.scheduled = True
+                time_since_last_call = time() - self.time_of_last_call
                 new_wait = max(0, wait - time_since_last_call)
-                if is_async:
-                    timer = AsyncTimer(new_wait, call_it)
+                if self.is_async:
+                    self.timer = AsyncTimer(new_wait, self.call_it, args, kwargs)
                 else:
-                    timer = Timer(new_wait, call_it)
-                timer.start()
-        return throttled
-    return decorator
+                    self.timer = Timer(new_wait, self.call_it, args, kwargs)
+                self.timer.start()
+        def __call__(self, fn):
+            self.fn = fn
+            return self.throttled
+    return Decorator()

@@ -8,7 +8,7 @@ def test_debounce_sync():
 
     counter = Signal(init=0)
 
-    @on_change(s, apply=debounce(0.1, is_async=False))
+    @on_change(s, apply=debounce(0.1))
     def _():
         counter.v += 1
 
@@ -29,7 +29,7 @@ def test_throttle_sync():
 
     counter = Signal(init=0)
 
-    @on_change(s, apply=throttle(0.13, is_async=False))
+    @on_change(s, apply=throttle(0.13))
     def _():
         counter.v += 1
 
@@ -47,7 +47,7 @@ def test_debounce_async():
 
         counter = Signal(init=0)
 
-        @on_change(s, apply=debounce(0.1, is_async=True))
+        @on_change(s, apply=debounce(0.1))
         def _():
             counter.v += 1
 
@@ -71,7 +71,7 @@ def test_throttle_async():
 
         counter = Signal(init=0)
 
-        @on_change(s, apply=throttle(0.13, is_async=True))
+        @on_change(s, apply=throttle(0.13))
         def _():
             counter.v += 1
 

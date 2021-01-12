@@ -1,7 +1,4 @@
-from .attrait import (Signal,
-                      change,
-                      all_change,
-                      on_change,
-                      on_all_change,
-                      debounce,
-                      throttle)
+from .signal import Signal
+from .apply import debounce, throttle
+from .asynchronous import change, change_to, all_change
+from .callback import assign, on_change, on_change_to, on_all_change
