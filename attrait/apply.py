@@ -75,3 +75,20 @@ def throttle(wait):
             self.fn = fn
             return self.throttled
     return Decorator()
+
+
+def delay(wait):
+    """ Decorator that will delay by `wait` seconds. """
+    class Decorator:
+        def __init__(self):
+            self.is_async = False
+        def delayed(self, *args, **kwargs):
+            if self.is_async:
+                self.timer = AsyncTimer(wait, self.fn, args, kwargs)
+            else:
+                self.timer = Timer(wait, self.fn, args, kwargs)
+            self.timer.start()
+        def __call__(self, fn):
+            self.fn = fn
+            return self.delayed
+    return Decorator()

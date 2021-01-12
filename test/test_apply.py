@@ -1,6 +1,6 @@
 import time
 import asyncio
-from attrait import Signal, on_change, debounce, throttle
+from attrait import Signal, on_change, debounce, throttle, delay
 
 
 def test_debounce_sync():
@@ -83,3 +83,19 @@ def test_throttle_async():
         assert counter.v == 4
 
     asyncio.run(main())
+
+
+def test_delay_async():
+    s1 = Signal(init=0)
+    s2 = Signal(init=0)
+
+    @on_change(s1, apply=delay(0.1))
+    def _():
+        s2.v = 1
+
+    assert s1.v == 0
+    assert s2.v == 0
+    s1.v = 1
+    assert s2.v == 0
+    time.sleep(0.2)
+    assert s2.v == 1
