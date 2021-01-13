@@ -4,7 +4,7 @@ import tempfile
 from textwrap import dedent
 from attrait import Signal
 from vcd import VCDWriter
-from vcd.gtkw import GTKWSave, GTKWFlag, spawn_gtkwave_interactive
+from vcd.gtkw import GTKWSave
 
 
 def test_vcd():
